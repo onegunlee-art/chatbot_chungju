@@ -68,7 +68,11 @@ class HttpTTSProvider:
         )
         return json.loads(raw)
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=8))
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=8),
+        reraise=True,  # RetryError 로 감싸면 호출부의 예외 분기가 어긋난다
+    )
     async def synthesize(self, text: str, voice_id: str | None = None) -> Speech:
         async with httpx.AsyncClient() as client:
             resp = await client.post(

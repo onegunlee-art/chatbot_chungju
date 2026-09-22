@@ -29,8 +29,8 @@ sources:
       link: "td.p-subject a, td.title a"
       date: "td.date, td:nth-child(4)"
       body: "div.p-view__content, div.bbs_content, td.content"
-      detail_title: "div.p-view__title, h3.title"
-      department: "div.p-view__info dd, span.dept"
+      detail_title: ".p-view__title, h3.title, .view-title"
+      department: ".p-view__info dd, .dept, span.dept"
 
   - id: chungju_notice
     name: 충주시 고시·공고
@@ -49,8 +49,8 @@ sources:
       link: "td.p-subject a, td.title a"
       date: "td.date, td:nth-child(4)"
       body: "div.p-view__content, div.bbs_content, td.content"
-      detail_title: "div.p-view__title, h3.title"
-      department: "div.p-view__info dd, span.dept"
+      detail_title: ".p-view__title, h3.title, .view-title"
+      department: ".p-view__info dd, .dept, span.dept"
 
   - id: chungju_notice_admin
     name: 충주시 행정예고·입법예고
@@ -66,7 +66,7 @@ sources:
       row: "table.p-table tbody tr"
       link: "td.p-subject a"
       date: "td.date"
-      body: "div.p-view__content"
+      body: ".p-view__content, .bbs_content"
 
   - id: chungju_tour
     name: 충주 관광 정보
@@ -82,7 +82,7 @@ sources:
       row: "table.p-table tbody tr"
       link: "td.p-subject a"
       date: "td.date"
-      body: "div.p-view__content"
+      body: ".p-view__content, .bbs_content"
 
   - id: chungju_welfare
     name: 충주시 복지·지원사업 안내
@@ -98,4 +98,4 @@ sources:
       row: "table.p-table tbody tr"
       link: "td.p-subject a"
       date: "td.date"
-      body: "div.p-view__content"
+      body: ".p-view__content, .bbs_content"

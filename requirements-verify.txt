@@ -1,0 +1,8 @@
+# 수집기 선택자 확인(`python -m app.cli verify`)에만 필요한 최소 패키지.
+# DB, 임베딩 모델, Anthropic API 키 모두 필요 없습니다.
+httpx>=0.27
+selectolax>=0.3.21
+pyyaml>=6.0
+python-dateutil>=2.9
+tenacity>=9.0
+pydantic-settings>=2.6

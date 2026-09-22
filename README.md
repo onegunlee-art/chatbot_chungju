@@ -127,12 +127,13 @@ python -m app.cli init-db                # 스키마 적용
 python -m app.cli verify <source_id>     # 수집기 선택자 검증
 python -m app.cli ingest [--limit N]     # 즉시 수집
 python -m app.cli ask "질문"              # 터미널에서 질의응답 테스트
-pytest                                   # 테스트 (48개)
+pytest                                   # 테스트 (64개)
 ruff check app tests                     # 린트
 ```
 
 ## 문서
 
+- **[노트북에서 돌리기](docs/RUN_ON_LAPTOP.md) — 처음이라면 여기부터**
 - [아키텍처](docs/ARCHITECTURE.md) — 전체 구조와 데이터 흐름
 - [데이터 소스](docs/DATA_SOURCES.md) — 수집 대상, 추가 방법, 수집 예절
 - [음성·아바타 동의 절차](docs/PERSONA_CONSENT.md) — **제작 전 반드시 읽을 것**

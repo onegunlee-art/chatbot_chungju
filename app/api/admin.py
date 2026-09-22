@@ -7,7 +7,8 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 
 from app.config import get_settings
 from app.db import connection
-from app.ingest.pipeline import load_sources, run_ingest
+from app.ingest.catalog import load_sources
+from app.ingest.pipeline import run_ingest
 from app.ingest.scheduler import next_run_time
 from app.schemas import IngestRequest
 

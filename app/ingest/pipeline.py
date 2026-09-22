@@ -11,34 +11,16 @@ import asyncio
 import logging
 import time
 from datetime import UTC, datetime
-from pathlib import Path
-
-import yaml
 
 from app.db import connection
 from app.ingest.base import RawDoc
+from app.ingest.catalog import active_sources, load_sources
 from app.ingest.collectors import build_collector
 from app.rag.chunker import chunk as chunk_text
 from app.rag.embeddings import get_embedder
 from app.rag.korean import tokens_to_column
 
 log = logging.getLogger(__name__)
-
-SOURCES_PATH = Path(__file__).parent / "sources.yaml"
-
-
-def load_sources(path: Path | str = SOURCES_PATH) -> list[dict]:
-    with open(path, encoding="utf-8") as f:
-        return yaml.safe_load(f)["sources"]
-
-
-def active_sources(sources: list[dict] | None = None) -> list[dict]:
-    """enabled 이고 verified 인 소스만 실제 수집에 쓴다.
-
-    선택자를 사람이 확인하지 않은 소스가 조용히 쓰레기를 넣는 일을 막는다.
-    """
-    return [s for s in (sources or load_sources()) if s.get("enabled") and s.get("verified")]
-
 
 # ── 저장 ────────────────────────────────────────────────────────────
 def _upsert_document(conn, doc: RawDoc) -> tuple[int, str]:

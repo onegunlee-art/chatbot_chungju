@@ -33,6 +33,7 @@ web/portrait.*
 # Logs & build
 logs/
 *.log
+verify-*.html
 dist/
 build/
 node_modules/

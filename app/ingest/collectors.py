@@ -22,7 +22,8 @@ from app.ingest.base import RawDoc
 
 log = logging.getLogger(__name__)
 
-USER_AGENT = "ChungjuCityBot/0.1 (+public information indexing; contact: 충주시청)"
+# HTTP 헤더는 ASCII 만 허용된다. 한글을 넣으면 httpx 가 요청 전에 UnicodeEncodeError 를 낸다.
+USER_AGENT = "ChungjuCityBot/0.1 (+public information indexing; contact: Chungju City Hall)"
 # 출처의 날짜는 모두 한국 표준시 기준이다. 서버 TZ 와 무관하게 해석이 같도록 고정한다.
 KST = ZoneInfo("Asia/Seoul")
 _DATE_RE = re.compile(r"(\d{4})[.\-/년\s]+(\d{1,2})[.\-/월\s]+(\d{1,2})")
@@ -59,7 +60,13 @@ class HtmlBoardCollector:
         self.trust_tier: int = config.get("trust_tier", 1)
         self.category: str | None = config.get("category")
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        # 재시도를 다 쓰면 원래 예외를 그대로 올린다. tenacity 기본값(RetryError)으로
+        # 감싸면 호출부의 `except httpx.HTTPError` 가 걸리지 않는다.
+        reraise=True,
+    )
     async def _get(self, client: httpx.AsyncClient, url: str) -> str:
         resp = await client.get(url, timeout=30.0, follow_redirects=True)
         resp.raise_for_status()
@@ -109,14 +116,20 @@ class HtmlBoardCollector:
 
     def _parse_detail(self, html: str) -> dict:
         tree = HTMLParser(html)
-        body_node = tree.css_first(self.sel["body"])
-        out = {"body": _text(body_node)}
-        if self.sel.get("detail_title"):
-            out["title"] = _text(tree.css_first(self.sel["detail_title"]))
-        if self.sel.get("department"):
-            out["department"] = _text(tree.css_first(self.sel["department"]))
+        out = {"body": _text(tree.css_first(self.sel["body"]))}
+
+        # 선택자가 빗나가면 빈 문자열이 아니라 값을 넣지 않는다. '' 이 DB 에 쌓이면
+        # '담당 부서 없음' 과 '담당 부서가 빈칸' 을 구분할 수 없다.
+        for key, sel_key in (("title", "detail_title"), ("department", "department")):
+            if self.sel.get(sel_key):
+                value = _text(tree.css_first(self.sel[sel_key]))
+                if value:
+                    out[key] = value
+
         if self.sel.get("detail_date"):
-            out["published_at"] = parse_date(_text(tree.css_first(self.sel["detail_date"])))
+            parsed = parse_date(_text(tree.css_first(self.sel["detail_date"])))
+            if parsed:
+                out["published_at"] = parsed
         return out
 
     async def collect(self, limit: int | None = None) -> list[RawDoc]:
