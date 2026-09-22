@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Data & models
+data/
+models/
+*.sqlite
+*.db
+.cache/
+
+# Persona assets (초상권/음성권 대상 - 저장소에 커밋 금지)
+assets/voice/**
+assets/face/**
+!assets/**/.gitkeep
+!assets/**/README.md
+
+# Logs & build
+logs/
+*.log
+dist/
+build/
+node_modules/
+.DS_Store

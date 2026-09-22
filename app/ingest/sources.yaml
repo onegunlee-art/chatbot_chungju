@@ -1,0 +1,101 @@
+# ─────────────────────────────────────────────────────────────────────
+# 수집 대상 목록
+#
+# ⚠ verified: false 인 항목은 실제 사이트에서 선택자를 확인하지 않은 상태입니다.
+#   개발 환경이 외부망에 닿지 않아 검증하지 못했습니다. 서버에 올린 뒤 반드시
+#       python -m app.cli verify <id>
+#   를 돌려 몇 건이 잡히는지 확인하고, 0건이면 selectors 를 고친 다음
+#   verified: true 로 바꾸세요. verified: false 인 소스는 일일 수집에서
+#   자동으로 제외되므로, 잘못된 자료가 DB에 섞일 일은 없습니다.
+#
+# trust_tier: 1=충주시 공식 / 2=타 공공기관 공식 / 3=언론보도 / 4=기타
+# ─────────────────────────────────────────────────────────────────────
+
+sources:
+  - id: chungju_press
+    name: 충주시 보도자료
+    type: html_board
+    enabled: true
+    verified: false
+    trust_tier: 1
+    category: 보도자료
+    list_url: "https://www.chungju.go.kr/www/selectBbsNttList.do?bbsNo=77&key=290&pageIndex={page}"
+    pages: 3
+    id_pattern: "nttNo=(\\d+)"
+    delay_seconds: 0.5
+    concurrency: 3
+    selectors:
+      row: "table.p-table tbody tr"
+      link: "td.p-subject a, td.title a"
+      date: "td.date, td:nth-child(4)"
+      body: "div.p-view__content, div.bbs_content, td.content"
+      detail_title: "div.p-view__title, h3.title"
+      department: "div.p-view__info dd, span.dept"
+
+  - id: chungju_notice
+    name: 충주시 고시·공고
+    type: html_board
+    enabled: true
+    verified: false
+    trust_tier: 1
+    category: 고시공고
+    list_url: "https://www.chungju.go.kr/www/selectBbsNttList.do?bbsNo=76&key=289&pageIndex={page}"
+    pages: 3
+    id_pattern: "nttNo=(\\d+)"
+    delay_seconds: 0.5
+    concurrency: 3
+    selectors:
+      row: "table.p-table tbody tr"
+      link: "td.p-subject a, td.title a"
+      date: "td.date, td:nth-child(4)"
+      body: "div.p-view__content, div.bbs_content, td.content"
+      detail_title: "div.p-view__title, h3.title"
+      department: "div.p-view__info dd, span.dept"
+
+  - id: chungju_notice_admin
+    name: 충주시 행정예고·입법예고
+    type: html_board
+    enabled: false          # URL 확인 후 활성화
+    verified: false
+    trust_tier: 1
+    category: 행정예고
+    list_url: "https://www.chungju.go.kr/www/selectBbsNttList.do?bbsNo=0&key=0&pageIndex={page}"
+    pages: 2
+    id_pattern: "nttNo=(\\d+)"
+    selectors:
+      row: "table.p-table tbody tr"
+      link: "td.p-subject a"
+      date: "td.date"
+      body: "div.p-view__content"
+
+  - id: chungju_tour
+    name: 충주 관광 정보
+    type: html_board
+    enabled: false          # 관광 포털 구조 확인 후 활성화
+    verified: false
+    trust_tier: 1
+    category: 관광
+    list_url: "https://www.chungju.go.kr/tour/selectBbsNttList.do?bbsNo=0&key=0&pageIndex={page}"
+    pages: 2
+    id_pattern: "nttNo=(\\d+)"
+    selectors:
+      row: "table.p-table tbody tr"
+      link: "td.p-subject a"
+      date: "td.date"
+      body: "div.p-view__content"
+
+  - id: chungju_welfare
+    name: 충주시 복지·지원사업 안내
+    type: html_board
+    enabled: false
+    verified: false
+    trust_tier: 1
+    category: 지원사업
+    list_url: "https://www.chungju.go.kr/www/selectBbsNttList.do?bbsNo=0&key=0&pageIndex={page}"
+    pages: 2
+    id_pattern: "nttNo=(\\d+)"
+    selectors:
+      row: "table.p-table tbody tr"
+      link: "td.p-subject a"
+      date: "td.date"
+      body: "div.p-view__content"
