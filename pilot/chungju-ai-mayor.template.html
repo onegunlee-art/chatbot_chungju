@@ -1,0 +1,427 @@
+<title>충주 AI 시장</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=Gowun+Batang:wght@700&display=swap">
+<style>
+  :root {
+    --ground: #F5F3EE; --panel: #FFFFFF; --ink: #1B1F26; --muted: #66707A; --line: #E2DED5;
+    --river: #1F4E79; --river-ink: #FFFFFF; --river-soft: #E7EEF6; --apple: #C8322B; --apple-soft: #FBECEA;
+    --bubble-user: #1F4E79; --ok: #2F7D4F; --focus: #1F4E79; --shadow: 0 8px 28px rgba(27,31,38,.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0F1318; --panel: #171C23; --ink: #E9ECF0; --muted: #98A2B3; --line: #273039;
+      --river: #6B9BD2; --river-ink: #0E1620; --river-soft: #1B2938; --apple: #E0574F; --apple-soft: #3A1E1C;
+      --bubble-user: #2E5D8F; --ok: #5CC08A; --focus: #6B9BD2; --shadow: 0 8px 28px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0F1318; --panel: #171C23; --ink: #E9ECF0; --muted: #98A2B3; --line: #273039;
+    --river: #6B9BD2; --river-ink: #0E1620; --river-soft: #1B2938; --apple: #E0574F; --apple-soft: #3A1E1C;
+    --bubble-user: #2E5D8F; --ok: #5CC08A; --focus: #6B9BD2; --shadow: 0 8px 28px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--ground); color: var(--ink);
+         font-family: "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  button { font: inherit; cursor: pointer; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 20px 16px 120px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand .mark { width: 34px; height: 34px; border-radius: 10px; background: var(--river); color: var(--river-ink);
+                 display: grid; place-items: center; font-family: "Gowun Batang", serif; font-weight: 700; font-size: 18px; }
+  .brand b { font-size: 16px; }
+  .brand small { display: block; font-size: 11.5px; color: var(--muted); letter-spacing: .04em; }
+  .pill { font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 5px 10px; border-radius: 999px;
+          border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  .pill.ai { background: var(--ink); color: var(--panel); border-color: var(--ink); display: inline-flex; gap: 6px; align-items: center; }
+  .pill.ai i { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+  @media (max-width: 820px) { .grid { grid-template-columns: minmax(0, 1fr); } .rail { order: 2; } }
+
+  /* ── 히어로 ─────────────────────────────────── */
+  .hero { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 22px; align-items: center;
+          background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 22px; box-shadow: var(--shadow); }
+  @media (max-width: 640px) { .hero { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; } }
+  .portrait { width: 220px; height: 220px; position: relative; justify-self: center; }
+  .portrait .halo { position: absolute; inset: -10px; border-radius: 50%; border: 2px solid var(--river); opacity: 0; }
+  .portrait .disc { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: var(--river-soft);
+                    border: 4px solid var(--panel); box-shadow: 0 10px 30px rgba(31,78,121,.22); }
+  .portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .portrait .state { position: absolute; z-index: 2; left: 50%; bottom: -6px; transform: translateX(-50%); white-space: nowrap;
+                     font-size: 12px; font-weight: 700; background: var(--panel); border: 1px solid var(--line);
+                     border-radius: 999px; padding: 5px 11px; display: inline-flex; align-items: center; gap: 6px; }
+  .portrait .state i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+  .portrait .pick { position: absolute; z-index: 2; right: 4px; top: 8px; width: 34px; height: 34px; border-radius: 50%;
+                    border: 2px solid var(--panel); background: var(--river); color: var(--river-ink); padding: 0; display: grid; place-items: center; }
+  .portrait .pick svg { width: 16px; height: 16px; }
+  .sticker { position: absolute; z-index: 2; left: -14px; top: 12px; transform: rotate(-8deg); background: #F7E27A; color: #2A2410;
+             font-weight: 800; font-size: 13px; padding: 5px 10px; border-radius: 8px; border: 2px solid #2A2410; }
+
+  .speech { position: relative; }
+  .speech .eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+  .speech .eyebrow b { background: var(--river); color: var(--river-ink); padding: 3px 9px; border-radius: 6px; font-size: 12px; }
+  .speech h1 { margin: 10px 0 8px; font-family: "Gowun Batang", "Nanum Myeongjo", serif; font-size: clamp(26px, 4vw, 36px);
+               line-height: 1.25; text-wrap: balance; }
+  .speech p { margin: 0; font-size: 15px; line-height: 1.75; color: var(--muted); max-width: 46ch; }
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .tools button { font-size: 12.5px; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line);
+                  background: var(--panel); color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+  .tools button[aria-pressed="true"] { border-color: var(--river); color: var(--river); background: var(--river-soft); }
+  .tools svg { width: 14px; height: 14px; }
+  @media (max-width: 640px) { .tools { justify-content: center; } .speech p { max-width: none; } }
+
+  /* 상태 애니메이션 */
+  .bars { display: none; align-items: flex-end; gap: 3px; height: 12px; }
+  .bars i { width: 3px; height: 4px; background: var(--river); border-radius: 2px; animation: bounce .9s ease-in-out infinite; }
+  .bars i:nth-child(2){animation-delay:.12s} .bars i:nth-child(3){animation-delay:.24s} .bars i:nth-child(4){animation-delay:.36s}
+  @keyframes bounce { 0%,100%{height:4px} 50%{height:12px} }
+  body[data-state="speaking"] .bars { display: flex; }
+  body[data-state="speaking"] .halo { opacity: .5; animation: halo 1.6s ease-out infinite; }
+  body[data-state="thinking"] .state i { animation: blink 1s infinite; }
+  @keyframes halo { from { transform: scale(1); opacity: .5 } to { transform: scale(1.12); opacity: 0 } }
+  @keyframes blink { 50% { opacity: .2 } }
+
+  /* ── 주제 카드 ───────────────────────────────── */
+  .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+  @media (max-width: 480px) { .cards { grid-template-columns: minmax(0, 1fr); } }
+  .card { text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 16px 14px;
+          display: flex; flex-direction: column; gap: 8px; transition: transform .12s ease, border-color .12s ease; }
+  .card:hover { transform: translateY(-1px); border-color: var(--river); }
+  .card svg { width: 22px; height: 22px; color: var(--river); }
+  .card b { font-size: 15px; }
+  .card span { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; }
+
+  /* ── 대화 ───────────────────────────────────── */
+  .log { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .bubble { max-width: 82%; padding: 12px 15px; border-radius: 16px; font-size: 15px; line-height: 1.75;
+            white-space: pre-wrap; word-break: break-word; }
+  .user .bubble { background: var(--bubble-user); color: #fff; border-bottom-right-radius: 5px; }
+  .bot .bubble { background: var(--panel); border: 1px solid var(--line); border-bottom-left-radius: 5px; }
+  .bot .bubble.wait { color: var(--muted); }
+  .evidence { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 9px; border-top: 1px dashed var(--line); }
+  .evidence span { font-size: 11.5px; padding: 3px 8px; border-radius: 999px; background: var(--river-soft); color: var(--river); font-weight: 700; }
+  .evidence span.none { background: var(--apple-soft); color: var(--apple); }
+  .unavailable { display: none; font-size: 13px; color: var(--muted); text-align: center; padding: 10px; }
+  body[data-sample="none"] .unavailable { display: block; }
+
+  /* ── 오른쪽 레일 ─────────────────────────────── */
+  .rail { display: flex; flex-direction: column; gap: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px; }
+  .panel h2 { margin: 0 0 6px; font-size: 14px; }
+  .panel p { margin: 0; font-size: 12.5px; line-height: 1.7; color: var(--muted); }
+  .kb { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .kb li { display: flex; justify-content: space-between; font-size: 13px; padding: 7px 10px; border-radius: 9px; background: var(--ground); }
+  .kb li b { font-variant-numeric: tabular-nums; color: var(--river); }
+  .kb li.lit { outline: 2px solid var(--river); }
+  .motto { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .motto svg { width: 15px; height: 15px; color: var(--ok); }
+
+  /* ── 입력 ───────────────────────────────────── */
+  .composer-bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--panel); border-top: 1px solid var(--line);
+                  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .composer { max-width: 1088px; margin: 0 auto; display: flex; gap: 8px; align-items: flex-end; }
+  textarea { flex: 1; resize: none; font: inherit; font-size: 15px; padding: 12px 14px; min-height: 48px; max-height: 140px;
+             border-radius: 14px; border: 1px solid var(--line); background: var(--ground); color: var(--ink); }
+  .send, .stop { font-weight: 700; border: 0; border-radius: 14px; padding: 0 20px; height: 48px; }
+  .send { background: var(--river); color: var(--river-ink); }
+  .send:disabled { opacity: .45; cursor: default; }
+  .stop { background: var(--apple); color: #fff; display: none; }
+  body[data-state="thinking"] .stop, body[data-state="speaking"] .stop { display: block; }
+  body[data-state="thinking"] .send, body[data-state="speaking"] .send { display: none; }
+  .hint { max-width: 1088px; margin: 6px auto 0; font-size: 11.5px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .hint svg { width: 13px; height: 13px; color: var(--ok); }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="mark">충</div>
+      <div><b>충주 AI 시장</b><small>비공개 파일럿 · 시험 운행 중</small></div>
+    </div>
+    <span class="pill ai"><i></i>AI 안내 · 시장 본인이 아닙니다</span>
+  </header>
+
+  <div class="grid">
+    <section>
+      <div class="hero">
+        <div class="portrait">
+          <span class="sticker">충주력 +100</span>
+          <div class="halo"></div>
+          <div class="disc"><img id="portrait" src="data:image/jpeg;base64,__PORTRAIT__" alt="충주 AI 시장 초상"></div>
+          <button class="pick" id="pickBtn" type="button" aria-label="사진 바꾸기" title="사진 바꾸기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          </button>
+          <input id="pickFile" type="file" accept="image/*" hidden>
+          <span class="state"><i></i><span id="stateText">대기 중</span></span>
+        </div>
+
+        <div class="speech">
+          <div class="eyebrow"><b>충주 AI 시장</b> 근거엔 진지 · 말투는 느긋 <span class="bars"><i></i><i></i><i></i><i></i></span></div>
+          <h1>충주 궁금한 거,<br>일단 물어보슈.</h1>
+          <p>관광이든 민원이든 아는 건 바로 알려드리고유, 모르는 건 시청 담당자한테 연결해 드릴게유. 뇌피셜은 안 합니다.</p>
+          <div class="tools">
+            <button id="voiceBtn" type="button" aria-pressed="false" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15 9a4 4 0 0 1 0 6"/></svg>
+              <span id="voiceLabel">음성 안내 켜기</span>
+            </button>
+            <button id="clearBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+              새 대화
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cards">
+        <button class="card" type="button" data-q="아이랑 충주에서 하루 놀 건데 어디가 좋아?">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20 9 6l4 8 2-3 6 9z"/></svg>
+          <b>아이랑 충주 하루 나들이</b><span>여행 <em>→</em></span>
+        </button>
+        <button class="card" type="button" data-q="부모님 모시고 수안보 가려는데 뭐 하면 좋아?">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14c2-3 5-3 8 0s6 3 8 0"/><path d="M4 18c2-3 5-3 8 0s6 3 8 0"/><path d="M8 10V6M12 9V4M16 10V6"/></svg>
+          <b>부모님 모시고 수안보 온천</b><span>휴식 <em>→</em></span>
+        </button>
+        <button class="card" type="button" data-q="충주로 이사 왔어. 뭐부터 하면 돼?">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+          <b>이사 왔는데 뭐부터 하지?</b><span>생활 <em>→</em></span>
+        </button>
+        <button class="card" type="button" data-q="충주 사과 왜 유명하고 어디서 사?">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8c-4-4-9-1-9 4 0 5 4 9 9 9s9-4 9-9c0-5-5-8-9-4z"/><path d="M12 8c0-3 1-4 3-5"/></svg>
+          <b>충주 사과, 어디서 사유?</b><span>먹거리 <em>→</em></span>
+        </button>
+      </div>
+
+      <div class="log" id="log"></div>
+      <p class="unavailable">이 페이지는 claude.ai 안에서 열어야 답변이 동작합니다.</p>
+    </section>
+
+    <aside class="rail">
+      <div class="panel">
+        <h2>함께 보는 근거</h2>
+        <p>답변 아래에 어느 자료를 썼는지 표시됩니다. 자료에 없는 건 지어내지 않고 담당 부서를 안내합니다.</p>
+        <ul class="kb" id="kbList"></ul>
+        <p style="margin-top:10px">지금은 파일럿용 기본 자료입니다. 정식 운영에서는 충주시청 자료가 매일 밤 자동으로 갱신됩니다.</p>
+      </div>
+      <div class="panel">
+        <h2>이 화면은</h2>
+        <p>서버 없이 페이지가 직접 Claude 에게 묻습니다. 사진은 이 기기에만 저장되고, 음성은 브라우저 내장 기능입니다. 외부 연동이 없습니다.</p>
+      </div>
+      <div class="motto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>
+        말은 느긋하게 · 근거는 단단하게
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="composer-bar">
+  <div class="composer">
+    <textarea id="input" aria-label="질문 입력" placeholder="충주 궁금한 거 툭 던져보슈"></textarea>
+    <button class="send" id="sendBtn" type="button">전송</button>
+    <button class="stop" id="stopBtn" type="button">중지</button>
+  </div>
+  <div class="hint">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg>
+    뇌피셜 금지 · 모르는 건 시청 043-850-5114 로 안내
+  </div>
+</div>
+
+<script>
+/* 충주 AI 시장 — 파일럿. 서버 없이 페이지가 직접 Claude 를 호출합니다. */
+
+const KB = {
+  "충주 기본": [
+    "충청북도 북부, 남한강과 충주호를 낀 도시. 인구 약 20만 명.",
+    "충주시청 대표전화 043-850-5114. 누리집 www.chungju.go.kr. 주소 충청북도 충주시 으뜸로 21.",
+  ],
+  "명소": [
+    "탄금대: 신라 우륵이 가야금을 연주했다고 전해지는 남한강변 절경. 임진왜란 때 신립 장군이 배수진을 친 곳. 산책로와 전망대, 아이와 걷기 좋음.",
+    "중앙탑(충주 탑평리 칠층석탑): 통일신라 석탑으로 국보. 중앙탑사적공원과 충주박물관이 곁에 있어 가족 나들이 코스.",
+    "충주 고구려비: 남한에 남은 유일한 고구려 비석, 국보. 충주고구려비전시관.",
+    "충주호: 충주댐으로 생긴 큰 호수. 유람선과 호반 드라이브.",
+    "수안보온천: 오래된 온천 관광지. 온천욕과 꿩요리. 어르신 모시고 가기 좋음.",
+    "활옥동굴: 옛 활석 광산을 관광지로 꾸민 동굴. 여름에 시원함.",
+    "계명산·남산(금봉산): 시내에서 가까운 산과 자연휴양림.",
+  ],
+  "먹거리·특산물": [
+    "충주 사과: 일교차 큰 남한강 유역에서 자라 단단하고 달콤. 충주 대표 특산물. 가을 수확철에 농가 직거래와 사과축제에서 살 수 있음. 평소엔 시장·농협 하나로마트.",
+    "복숭아, 밤도 유명. 수안보 꿩요리.",
+  ],
+  "문화·축제": [
+    "택견의 본고장. 충주 택견원이 있고 세계무술축제가 택견을 중심으로 열림.",
+    "주요 축제: 충주 세계무술축제, 우륵문화제, 충주 사과축제, 수안보온천제. 정확한 날짜는 해마다 달라 시청 누리집 확인.",
+  ],
+  "교통": [
+    "충주역: 중부내륙선, KTX-이음 정차.",
+    "충주공용버스터미널: 서울·수도권 등 시외버스.",
+    "중부내륙고속도로 충주IC, 북충주IC.",
+  ],
+  "교육": [
+    "한국교통대학교, 건국대학교 글로컬캠퍼스.",
+  ],
+  "민원 어디로": [
+    "전입신고: 정부24 온라인, 또는 사는 곳 읍·면·동 행정복지센터. 이사 후 14일 안에.",
+    "여권: 시청 민원 부서. 온라인 사전 신청 가능.",
+    "대형폐기물: 읍·면·동에 신고 후 스티커 부착 배출.",
+    "잘 모르는 민원: 시청 대표전화 043-850-5114 로 물어보면 담당 부서로 연결.",
+  ],
+};
+
+const KNOWLEDGE = Object.entries(KB).map(([k, v]) => `[${k}]\n` + v.map(x => "- " + x).join("\n")).join("\n\n");
+
+const RULES = `당신은 "충주 AI 시장"입니다. 충청북도 충주시장을 대신해 시민을 맞는 AI 비서입니다.
+
+말투: 따뜻하고 유쾌한 존댓말. 충청도 억양을 살짝 섞습니다("~해유", "~보슈", "천천히 하셔유")— 문장마다가 아니라 한두 군데만. 농담은 가볍게 한 스푼, 사실은 정확하게. "우리 충주"라는 말을 자연스럽게 씁니다. 딱딱한 공문체는 금지.
+
+반드시 지킬 것:
+1. 아래 <자료> 안의 내용만 사실로 말합니다. 자료에 없는 수치·날짜·금액·자격요건은 절대 지어내지 않습니다.
+2. 자료에 없는 것을 물으면 솔직하게 "그건 제가 확실히 몰라유" 하고, 충주시청 대표전화 043-850-5114 나 담당 부서로 안내합니다.
+3. 특정 정당·후보·선거 이야기는 하지 않습니다. 물으면 선관위(1390) 안내로 넘깁니다.
+4. 시장 개인의 사생활, 미공개 계획, 인사에 대해서는 답하지 않습니다.
+5. 짧게. 보통 3~5문장. 절차가 있으면 번호로.
+6. 마크다운 기호(**, #, - 등) 금지. 소리로 읽어주므로 평문으로만.
+7. "진짜 시장님이세요?" 하면 시장님을 대신하는 AI라고 분명히 말합니다.
+8. 답의 맨 마지막 줄에 반드시 이렇게 씁니다: §근거: 사용한 자료의 [섹션 이름]들을 쉼표로 (예: §근거: 명소, 교통). 자료를 쓰지 않았으면 §근거: 없음
+
+<자료>
+${KNOWLEDGE}
+</자료>`;
+
+const $ = (id) => document.getElementById(id);
+const log = $('log'), input = $('input'), sendBtn = $('sendBtn'), stopBtn = $('stopBtn'), stateText = $('stateText');
+const turns = [];
+let sample = null, ctl = null;
+
+/* 근거 레일 */
+const kbList = $('kbList');
+for (const [name, items] of Object.entries(KB)) {
+  const li = document.createElement('li'); li.dataset.name = name;
+  li.innerHTML = `<span></span><b></b>`; li.firstChild.textContent = name; li.lastChild.textContent = items.length + '건';
+  kbList.appendChild(li);
+}
+function lightRail(names) {
+  kbList.querySelectorAll('li').forEach(li => li.classList.toggle('lit', names.includes(li.dataset.name)));
+}
+
+const LABEL = { idle: '대기 중', thinking: '자료 뒤지는 중', speaking: '말씀드리는 중' };
+function setState(s) { document.body.dataset.state = s; stateText.textContent = LABEL[s]; }
+
+function bubble(role, text, cls) {
+  const wrap = document.createElement('div'); wrap.className = 'msg ' + role;
+  const b = document.createElement('div'); b.className = 'bubble' + (cls ? ' ' + cls : '');
+  b.textContent = text; wrap.appendChild(b); log.appendChild(wrap);
+  b.scrollIntoView({ block: 'end', behavior: 'smooth' }); return b;
+}
+
+/* 답 본문과 §근거 줄 분리 */
+function split(text) {
+  const m = text.match(/\n?§근거\s*[:：]\s*(.*)\s*$/);
+  if (!m) return { body: text.trim(), sources: null };
+  const body = text.slice(0, m.index).trim();
+  const raw = m[1].trim();
+  const sources = (!raw || raw === '없음') ? [] : raw.split(/[,、，]/).map(s => s.trim().replace(/^\[|\]$/g, '')).filter(Boolean);
+  return { body, sources };
+}
+function renderEvidence(b, sources) {
+  if (sources === null) return;
+  const box = document.createElement('div'); box.className = 'evidence';
+  if (!sources.length) { const s = document.createElement('span'); s.className = 'none'; s.textContent = '자료 없음 · 담당 부서 안내'; box.appendChild(s); }
+  for (const name of sources) { const s = document.createElement('span'); s.textContent = '근거 · ' + name; box.appendChild(s); }
+  b.appendChild(box); lightRail(sources);
+}
+
+/* 사진: 이 기기에만 저장 */
+(function portrait() {
+  const img = $('portrait'), file = $('pickFile');
+  try { const saved = localStorage.getItem('portrait'); if (saved) img.src = saved; } catch (e) {}
+  $('pickBtn').addEventListener('click', () => file.click());
+  file.addEventListener('change', () => {
+    const f = file.files && file.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { img.src = r.result; try { localStorage.setItem('portrait', r.result); } catch (e) {} };
+    r.readAsDataURL(f);
+  });
+})();
+
+/* 음성: 브라우저 내장 */
+const voice = {
+  on: false, ok: typeof speechSynthesis !== 'undefined', ko: null,
+  pick() { const v = speechSynthesis.getVoices(); this.ko = v.find(x => x.lang === 'ko-KR') || v.find(x => (x.lang || '').startsWith('ko')) || null; },
+  speak(t) { if (!this.on || !this.ok || !t) return; speechSynthesis.cancel();
+             const u = new SpeechSynthesisUtterance(t); u.lang = 'ko-KR'; if (this.ko) u.voice = this.ko; speechSynthesis.speak(u); },
+  stop() { if (this.ok) speechSynthesis.cancel(); },
+};
+(function setupVoice() {
+  const btn = $('voiceBtn'); if (!voice.ok) return;
+  voice.pick(); speechSynthesis.onvoiceschanged = () => voice.pick();
+  btn.hidden = false;
+  try { voice.on = localStorage.getItem('voiceOn') === '1'; } catch (e) {}
+  const render = () => { btn.setAttribute('aria-pressed', String(voice.on)); $('voiceLabel').textContent = voice.on ? '음성 안내 켜짐' : '음성 안내 켜기'; };
+  render();
+  btn.addEventListener('click', () => { voice.on = !voice.on; if (!voice.on) voice.stop();
+    try { localStorage.setItem('voiceOn', voice.on ? '1' : '0'); } catch (e) {} render(); });
+})();
+
+/* 대화 */
+const COPY = {
+  not_granted: '이 페이지가 Claude 를 쓰도록 허용해 주셔야 답할 수 있어유.',
+  rate_limited: '지금 손님이 많네유. 잠시 뒤에 다시 물어봐 주셔유.',
+  session_expired: '로그인이 풀렸어유. 다시 로그인해 주셔유.',
+  refused: '그 질문엔 답해 드리기 어렵네유.',
+  prompt_too_large: '대화가 길어졌어유. 새 대화로 시작해 주셔유.',
+  upstream_error: '연결이 잠깐 끊겼어유. 다시 물어봐 주셔유.',
+};
+
+async function ask(q) {
+  if (!sample || ctl) return;
+  voice.stop();
+  bubble('user', q);
+  const b = bubble('bot', '자료 뒤지는 중이유…', 'wait');
+  turns.push({ role: 'user', content: q });
+  while (turns.length > 12) turns.shift();
+  ctl = new AbortController();
+  setState('thinking');
+  let full = '';
+  try {
+    const res = await sample([{ role: 'user', content: RULES }, ...turns], {
+      cache: false, modelTier: 'quick', signal: ctl.signal,
+      onText: ({ text }) => {
+        if (!full) { b.classList.remove('wait'); setState('speaking'); }
+        full = text; b.textContent = split(text).body; b.scrollIntoView({ block: 'end' });
+      },
+    });
+    full = res.text;
+    const { body, sources } = split(full);
+    b.textContent = body; b.classList.remove('wait');
+    renderEvidence(b, sources);
+    turns.push({ role: 'assistant', content: full });
+    voice.speak(body);
+  } catch (e) {
+    const code = (e && e.code) || 'upstream_error';
+    if (code === 'cancelled') {
+      if (e.text) { b.textContent = split(e.text).body; turns.push({ role: 'assistant', content: e.text }); } else { b.parentNode.remove(); turns.pop(); }
+    } else {
+      b.classList.remove('wait'); b.textContent = (e && e.text) ? split(e.text).body : (COPY[code] || COPY.upstream_error); turns.pop();
+      if (code === 'not_granted' || code === 'sampling_disabled') document.body.dataset.sample = 'none';
+    }
+  } finally { setState('idle'); ctl = null; input.focus(); }
+}
+
+function submit() { const q = input.value.trim(); if (!q || ctl) return; input.value = ''; ask(q); }
+sendBtn.addEventListener('click', submit);
+stopBtn.addEventListener('click', () => { if (ctl) ctl.abort(); voice.stop(); });
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } });
+document.querySelectorAll('.card').forEach(c => c.addEventListener('click', () => ask(c.dataset.q)));
+$('clearBtn').addEventListener('click', () => { if (ctl) ctl.abort(); voice.stop(); turns.length = 0; log.textContent = ''; lightRail([]); input.focus(); });
+
+setState('idle');
+(async () => {
+  sample = window.claude && window.claude.use ? await window.claude.use('sample') : null;
+  if (!sample) { document.body.dataset.sample = 'none'; sendBtn.disabled = true; }
+})();
+</script>
