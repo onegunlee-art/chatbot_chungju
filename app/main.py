@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api import admin, chat, health
+from app.api import admin, chat, health, voice
 from app.config import get_settings
 from app.db import close_pool
 from app.ingest.scheduler import shutdown_scheduler, start_scheduler
@@ -55,6 +55,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(chat.router)
 app.include_router(admin.router)
+app.include_router(voice.router)
 
 _web = Path(__file__).resolve().parent.parent / "web"
 if _web.is_dir():

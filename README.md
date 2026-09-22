@@ -14,7 +14,9 @@
 | 수집 감사 (무엇이 빠졌는지 확인) | ✅ 구현 완료 |
 | 테스트용 웹 UI | ✅ 구현 완료 |
 | 충주시청 게시판 CSS 선택자 | ⚠️ **미검증** — [아래 참고](#2-수집기-선택자-검증-필수) |
-| 시장 음성 / 아바타 | ⏸ **보류** — [동의 확보 후](docs/PERSONA_CONSENT.md) |
+| 마스코트 시안 (캐릭터형 4방향) | ✅ 시안 완료 — 컨펌 대기 |
+| 음성(TTS) 연결부 + 선거법 자동 중단 | ✅ 구현 완료 — [업체 선정 대기](docs/VOICE_OPTIONS.md) |
+| 시장 음성 복제 / 실사 아바타 | ⏸ **보류** — [동의 확보 후](docs/PERSONA_CONSENT.md) |
 
 ---
 
@@ -122,7 +124,7 @@ python -m app.cli init-db                # 스키마 적용
 python -m app.cli verify <source_id>     # 수집기 선택자 검증
 python -m app.cli ingest [--limit N]     # 즉시 수집
 python -m app.cli ask "질문"              # 터미널에서 질의응답 테스트
-pytest                                   # 테스트 (25개)
+pytest                                   # 테스트 (38개)
 ruff check app tests                     # 린트
 ```
 
@@ -131,6 +133,7 @@ ruff check app tests                     # 린트
 - [아키텍처](docs/ARCHITECTURE.md) — 전체 구조와 데이터 흐름
 - [데이터 소스](docs/DATA_SOURCES.md) — 수집 대상, 추가 방법, 수집 예절
 - [음성·아바타 동의 절차](docs/PERSONA_CONSENT.md) — **제작 전 반드시 읽을 것**
+- [음성 업체 선정](docs/VOICE_OPTIONS.md) — 후보 비교와 붙이는 방법
 - [로드맵](docs/ROADMAP.md) — 남은 일과 12월 모두의AI 연동 준비
 
 ## 기술 스택
