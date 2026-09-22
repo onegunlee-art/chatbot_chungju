@@ -26,6 +26,7 @@ models/
 # Persona assets (초상권/음성권 대상 - 저장소에 커밋 금지)
 assets/voice/**
 assets/face/**
+web/portrait.*
 !assets/**/.gitkeep
 !assets/**/README.md
 

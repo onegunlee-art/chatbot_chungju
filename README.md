@@ -14,9 +14,10 @@
 | 수집 감사 (무엇이 빠졌는지 확인) | ✅ 구현 완료 |
 | 테스트용 웹 UI | ✅ 구현 완료 |
 | 충주시청 게시판 CSS 선택자 | ⚠️ **미검증** — [아래 참고](#2-수집기-선택자-검증-필수) |
-| 아바타 데모 화면 (`web/avatar.html`) | ✅ 구현 완료 — 시연용 |
+| 아바타 데모 화면 (`web/avatar.html`) | ✅ 구현 완료 — 사진 + 브라우저 음성, 연동 0 |
 | 동의서 서식 + 동의 영상 대본 | ✅ 작성 완료 — 서명 대기 |
-| 음성(TTS) 연결부 + 선거법 자동 중단 | ✅ 구현 완료 — [업체 선정 대기](docs/VOICE_OPTIONS.md) |
+| 음성 안내 (브라우저 내장) | ✅ 구현 완료 — API 키·비용·연동 없음 |
+| 상용 TTS 연결부 + 선거법 자동 중단 | ✅ 구현 완료 — [업체 선정 대기](docs/VOICE_OPTIONS.md) |
 | 시장 음성 복제 / 실사 아바타 | ⏸ **동의 확보 후** — [제작 계획](docs/AVATAR_PLAN.md) |
 
 ---
@@ -126,7 +127,7 @@ python -m app.cli init-db                # 스키마 적용
 python -m app.cli verify <source_id>     # 수집기 선택자 검증
 python -m app.cli ingest [--limit N]     # 즉시 수집
 python -m app.cli ask "질문"              # 터미널에서 질의응답 테스트
-pytest                                   # 테스트 (38개)
+pytest                                   # 테스트 (48개)
 ruff check app tests                     # 린트
 ```
 

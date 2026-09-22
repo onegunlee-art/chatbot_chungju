@@ -36,7 +36,17 @@
   .frame { position: absolute; inset: 0; border-radius: 50%; overflow: hidden;
            background: var(--panel); border: 3px solid var(--panel);
            box-shadow: 0 6px 22px rgba(20,24,31,.13); }
-  .frame svg { display: block; width: 100%; height: 100%; }
+  .frame svg, .frame img { display: block; width: 100%; height: 100%; }
+  .frame img { object-fit: cover; }
+  .frame img[hidden] { display: none; }
+
+  .toggle { display: flex; justify-content: center; margin-top: 12px; }
+  .toggle button { display: inline-flex; align-items: center; gap: 6px;
+                   font: inherit; font-size: 12.5px; padding: 6px 13px; cursor: pointer;
+                   border: 1px solid var(--line); border-radius: 999px;
+                   background: var(--panel); color: var(--muted); }
+  .toggle button[aria-pressed="true"] { border-color: var(--brand); color: var(--brand); }
+  .toggle button[hidden] { display: none; }
 
   .slot-note { text-align: center; font-size: 11px; color: var(--muted);
                margin-top: 10px; line-height: 1.5; }
@@ -108,8 +118,10 @@
     <div class="avatar">
       <div class="ring"></div>
       <div class="frame">
-        <!-- 동의서 서명 후, 이 자리에 실제 아바타 영상이 들어갑니다. -->
-        <svg viewBox="0 0 172 172" role="img" aria-label="아바타가 들어갈 자리">
+        <!-- web/portrait.jpg 를 두면 이 사진이 쓰이고, 없으면 아래 자리 표시가 나옵니다.
+             합성하지 않은 실제 사진이므로 아바타 제작 절차가 필요 없습니다. -->
+        <img id="portrait" alt="충주시장" hidden>
+        <svg id="placeholder" viewBox="0 0 172 172" role="img" aria-label="사진이 들어갈 자리">
           <rect width="172" height="172" fill="#dfe6ec"/>
           <path d="M86 42c-14 0-25 11-25 26s11 27 25 27 25-12 25-27-11-26-25-26z" fill="#b9c4ce"/>
           <path d="M28 168c0-30 26-49 58-49s58 19 58 49z" fill="#b9c4ce"/>
@@ -127,9 +139,15 @@
       <span id="stateText">무엇이든 물어보세요</span>
     </div>
 
-    <p class="slot-note">
-      지금은 <strong>자리 표시</strong>입니다. 동의서 서명과 동의 영상 촬영이 끝나면<br>
-      이 자리에 시장님 아바타가 들어가고, 답변이 음성으로 나옵니다.
+    <div class="toggle">
+      <button id="voiceBtn" type="button" aria-pressed="false" hidden>
+        <span id="voiceIcon" aria-hidden="true">🔈</span><span id="voiceLabel">음성 안내 켜기</span>
+      </button>
+    </div>
+
+    <p class="slot-note" id="slotNote">
+      <strong>web/portrait.jpg</strong> 에 시장님 사진을 넣으면 이 자리에 들어갑니다.<br>
+      합성이 아닌 실제 사진이라 별도 제작 절차가 필요 없습니다.
     </p>
   </section>
 
@@ -163,6 +181,78 @@ const sendBtn = document.getElementById('send');
 const stateText = document.getElementById('stateText');
 const sessionId = (crypto.randomUUID && crypto.randomUUID()) || String(Date.now());
 const history = [];
+
+/* ── 사진 슬롯 ──────────────────────────────────────────────
+   web/portrait.jpg 가 있으면 쓰고, 없으면 자리 표시를 그대로 둔다.
+   합성물이 아니라 본인이 고른 사진이므로 아바타 제작 절차가 필요 없다. */
+(function loadPortrait() {
+  const img = document.getElementById('portrait');
+  const placeholder = document.getElementById('placeholder');
+  const note = document.getElementById('slotNote');
+  const probe = new Image();
+  probe.onload = () => {
+    img.src = probe.src;
+    img.hidden = false;
+    placeholder.remove();
+    note.textContent = '실제 사진입니다. 합성하지 않았습니다.';
+  };
+  probe.onerror = () => { /* 사진이 없으면 자리 표시 유지 */ };
+  probe.src = '/portrait.jpg';
+})();
+
+/* ── 음성 안내 ──────────────────────────────────────────────
+   브라우저에 내장된 음성 합성을 씁니다. 외부 연동도, API 키도, 비용도 없습니다.
+   시장님 목소리는 아니며, 그 점은 화면의 AI 배지로 이미 알리고 있습니다. */
+const voice = {
+  on: false,
+  supported: typeof speechSynthesis !== 'undefined',
+  koVoice: null,
+
+  pickKoreanVoice() {
+    const voices = speechSynthesis.getVoices();
+    this.koVoice = voices.find(v => v.lang === 'ko-KR')
+                || voices.find(v => v.lang && v.lang.startsWith('ko'))
+                || null;
+  },
+
+  speak(text) {
+    if (!this.on || !this.supported || !text) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    if (this.koVoice) u.voice = this.koVoice;
+    u.rate = 1.0;
+    speechSynthesis.speak(u);
+  },
+
+  stop() { if (this.supported) speechSynthesis.cancel(); },
+};
+
+(function setupVoice() {
+  const btn = document.getElementById('voiceBtn');
+  if (!voice.supported) return;   // 지원하지 않는 브라우저면 버튼을 숨긴 채 둔다
+
+  voice.pickKoreanVoice();
+  // 음성 목록은 비동기로 채워지는 브라우저가 있다
+  speechSynthesis.onvoiceschanged = () => voice.pickKoreanVoice();
+
+  btn.hidden = false;
+  try { voice.on = localStorage.getItem('voiceOn') === '1'; } catch (e) { /* 무시 */ }
+  render();
+
+  btn.addEventListener('click', () => {
+    voice.on = !voice.on;
+    if (!voice.on) voice.stop();
+    try { localStorage.setItem('voiceOn', voice.on ? '1' : '0'); } catch (e) { /* 무시 */ }
+    render();
+  });
+
+  function render() {
+    btn.setAttribute('aria-pressed', String(voice.on));
+    document.getElementById('voiceIcon').textContent = voice.on ? '🔊' : '🔈';
+    document.getElementById('voiceLabel').textContent = voice.on ? '음성 안내 끄기' : '음성 안내 켜기';
+  }
+})();
 
 const STATE_LABEL = {
   idle: '무엇이든 물어보세요',
@@ -216,6 +306,7 @@ function renderCitations(bubble, citations) {
 }
 
 async function ask(question) {
+  voice.stop();
   addBubble('user', question);
   const bubble = addBubble('bot', '');
   let answer = '';
@@ -262,6 +353,7 @@ async function ask(question) {
           bubble.textContent = answer;
         } else if (event === 'done') {
           renderCitations(bubble, citations);
+          voice.speak(data.spoken);
         }
       }
     }

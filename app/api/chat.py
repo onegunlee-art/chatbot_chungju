@@ -12,6 +12,7 @@ from app.llm.client import stream_answer
 from app.llm.persona import NO_EVIDENCE_MARKER
 from app.rag.retriever import Evidence, retrieve
 from app.schemas import ChatRequest, ChatResponse, Citation
+from app.voice.base import to_speakable
 
 log = logging.getLogger(__name__)
 router = APIRouter(tags=["chat"])
@@ -89,7 +90,12 @@ async def chat_stream(req: ChatRequest) -> StreamingResponse:
 
         answer = "".join(answer_parts)
         unanswered = NO_EVIDENCE_MARKER in answer or not evidences
-        yield _sse("done", {"unanswered": unanswered, "usage": usage})
+        # spoken: 낭독용으로 다듬은 문장. 브라우저 내장 음성이 그대로 읽는다.
+        # 화면용 표기(근거 번호 [2], URL)가 소리로 나오지 않게 서버에서 한 번만 처리한다.
+        yield _sse(
+            "done",
+            {"unanswered": unanswered, "usage": usage, "spoken": to_speakable(answer)},
+        )
         _log_turn(req.session_id, req.message, answer, citations, unanswered, usage)
 
     return StreamingResponse(
